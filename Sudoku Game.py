@@ -170,66 +170,111 @@ class Cube:
         # Set the font for the value
         fnt = pygame.font.SysFont("comicsans", 40)
 
+        # Calculate the gap between cells
         gap = self.width / 9
+        # Calculate the top-left x coordinate of the cell
         x = self.col * gap
+        # Calculate the top-left y coordinate of the cell
         y = self.row * gap
 
-
+        # If the cube has a temporary value and no permanent value, render the temporary value
         if self.temp != 0 and self.value == 0:
+            # Render the temporary value in light grey
             text = fnt.render(str(self.temp), 1, (128,128,128))
+            # Draw the text on the window with a small offset
             win.blit(text, (x+5, y+5))
+        # If the cube has a permanent value, render the permanent value
         elif not(self.value == 0):
+            # Render the permanent value in black
             text = fnt.render(str(self.value), 1, (0, 0, 0))
+            # Draw the text on the window with the text centered in the cell
             win.blit(text, (x + (gap/2 - text.get_width()/2), y + (gap/2 - text.get_height()/2)))
 
+        # If the cube is selected, draw a red border around it
         if self.selected:
             pygame.draw.rect(win, (255,0,0), (x,y, gap ,gap), 3)
 
+
+    # Set the permanent value of the cube
+    # val: New value for the cube
     def set(self, val):
         self.value = val
 
+    # Set the temporary value of the cube
+    # val: New temporary value for the cube
     def set_temp(self, val):
         self.temp = val
 
 
+
+# Redraw the window with the updated board and timer
+# win: Window to draw on
+# board: Board object to draw
+# time: Time in seconds to display
+# strikes: Number of strikes to display
 def redraw_window(win, board, time, strikes):
+    # Fill the window with white
     win.fill((255,255,255))
-    # Draw time
+
+    # Set the font for the text
     fnt = pygame.font.SysFont("comicsans", 40)
+    # Render the time text
     text = fnt.render("Time: " + format_time(time), 1, (0,0,0))
+    # Draw the time text on the window
     win.blit(text, (540 - 160, 560))
-    # Draw Strikes
+    # Render the strikes text
     text = fnt.render("X " * strikes, 1, (255, 0, 0))
+    # Draw the strikes text on the window
     win.blit(text, (20, 560))
-    # Draw grid and board
+    # Draw the board on the window
     board.draw(win)
 
 
+# Format the time as a string in the format HH:MM:SS
+# secs: Time in seconds
+# return: Formatted time string
 def format_time(secs):
-    sec = secs%60
-    minute = secs//60
-    hour = minute//60
+    # Calculate the number of seconds
+    sec = secs % 60
+    # Calculate the number of minutes
+    minute = secs // 60
+    # Calculate the number of hours
+    hour = minute // 60
 
+    # Format the time as a string
     mat = " " + str(minute) + ":" + str(sec)
     return mat
 
 
 def main():
+    # Create the window
     win = pygame.display.set_mode((610,620))
+    # Set the window caption
     pygame.display.set_caption("Sudoku")
+    # Create the board
     board = Grid(9, 9, 540, 540)
+    # Initialize the key variable
     key = None
+    # Set the run variable to True to start the game loop
     run = True
+    # Record the start time
     start = time.time()
+    # Initialize the number of strikes to 0
     strikes = 0
-    while run:
 
+    # Main game loop
+    while run:
+        # Calculate the elapsed time
         play_time = round(time.time() - start)
 
+        # Handle events
         for event in pygame.event.get():
+            # If the user closes the window, set run to False to stop the game loop
             if event.type == pygame.QUIT:
                 run = False
+            # If the user presses a key
             if event.type == pygame.KEYDOWN:
+                # Set the key variable based on the key that was pressed
                 if event.key == pygame.K_1:
                     key = 1
                 if event.key == pygame.K_2:
@@ -248,36 +293,50 @@ def main():
                     key = 8
                 if event.key == pygame.K_9:
                     key = 9
+                # If the user pressed the Delete key, clear the selected cell
                 if event.key == pygame.K_DELETE:
                     board.clear()
                     key = None
+                # If the user pressed the Return key, try to place the temporary value in the selected cell
                 if event.key == pygame.K_RETURN:
+                    # Get the indices of the selected cell
                     i, j = board.selected
+                    # If the selected cell has a temporary value
                     if board.cubes[i][j].temp != 0:
+                        # Try to place the temporary value in the cell
                         if board.place(board.cubes[i][j].temp):
                             print("Success")
                         else:
                             print("Wrong")
                             strikes += 1
+                        # Reset the key variable
                         key = None
 
+                        # If the puzzle is finished, end the game loop
                         if board.is_finished():
                             print("Game over")
                             run = False
 
+            # If the user clicked the mouse
             if event.type == pygame.MOUSEBUTTONDOWN:
+                # Get the position of the mouse click
                 pos = pygame.mouse.get_pos()
+                # Check if the click was on a cell
                 clicked = board.click(pos)
+                # If a cell was clicked, select it and reset the key variable
                 if clicked:
                     board.select(clicked[0], clicked[1])
                     key = None
 
-        if board.selected and key != None:
+        # If a cell is selected and a key has been pressed, try to sketch the value in the cell
+        if board.selected and key is not None:
             board.sketch(key)
 
+        # Redraw the window and update the display
         redraw_window(win, board, play_time, strikes)
         pygame.display.update()
-
-
+# Run the main game loop
 main()
+
+# Quit pygame
 pygame.quit()

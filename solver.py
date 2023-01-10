@@ -3,90 +3,95 @@
 # Coder: Amelia Eric-Markovic
 # Creator: techwithtim.net
 
-# Checks if the board has been solved
+# Check if the board has been solved
 # bo: Board multidimensional list
 def solve(bo):
-    # Checks if the 
+    # Find an empty cell on the board
     find = find_empty(bo)
-    # Found the solution
+    # If no empty cells are found, the solution has been found
     if not find:
         return True
-    # Solution not found
+    # If an empty cell is found, try filling it with a valid value
     else:
         row, col = find
-    # Checks through all the columns
+    # Try filling the cell with all possible values (1-9)
     for i in range(1,10):
-        # Checks if the 
+        # Check if the value is valid for the current cell
         if valid(bo, i, (row, col)):
+            # Place the value in the cell
             bo[row][col] = i
-
+            # Recursively try to solve the rest of the board with the new value placed
             if solve(bo):
                 return True
-
+            # If the value doesn't lead to a solution, reset the cell to empty
             bo[row][col] = 0
 
     return False
 
-# Checks if the new number put in is valid
+
+# Check if the newly inserted number is valid
 # bo: Board multidimensional list
-# num: Insterted number
+# num: Inserted number
 # pos: Position of the newly inserted number
 def valid(bo, num, pos):
-    # Check row
+    # Check the row for any occurrences of the number
     for i in range(len(bo[0])):
-        # Checks if the new number already exists
+        # If the number exists in the row and it's not in the current cell, return False
         if bo[pos[0]][i] == num and pos[1] != i:
             return False
 
-    # Check column
+    # Check the column for any occurrences of the number
     for i in range(len(bo)):
-        # Checks if the new number already exists
+        # If the number exists in the column and it's not in the current cell, return False
         if bo[i][pos[1]] == num and pos[0] != i:
             return False
 
-    # Check box
+    # Find the box that the current cell is in
     box_x = pos[1] // 3
     box_y = pos[0] // 3
 
-    # checks for each row by number
+    # Check the box for any occurrences of the number
+    # Check each row in the box
     for i in range(box_y * 3, box_y * 3 + 3):
-        # Checks the column by number
+        # Check each column in the box
         for j in range(box_x * 3, box_x * 3 + 3):
-            # Checks if the new number already exists
+            # If the number exists in the box and it's not in the current cell, return False
             if bo[i][j] == num and (i,j) != pos:
                 return False
 
+    # If the number is not found in the row, column, or box, return True
     return True
+
 
 # Displays the board
 # bo: Board multidimensional list
 def print_board(bo):
     # Loops through every row
     for i in range(len(bo)):
-        # Checks if the row is the third row and is not the first row
+        # If at the third row (and not the first row), print a line to separate the 3x3 squares
         if i % 3 == 0 and i != 0:
             print("- - - - - - - - - - - - - ")
-        # Loops through every column
+        # Loops through each column of the board
         for j in range(len(bo[0])):
-            # Checks if the column is the third column and is not the first column
+            # If at the third column (and not the first column), print a vertical separator
             if j % 3 == 0 and j != 0:
                 print(" | ", end="")
-            # Checks if in the last column
+            # If at the last column, print the value and move to the next line
             if j == 8:
                 print(bo[i][j])
-            # Adds spaces between numbers if not the last column
+            # If not at the last column, print the value with a space after it
             else:
                 print(str(bo[i][j]) + " ", end="")
 
 # Checks for an empty square on the board
 # bo: Board multidimensional list
 def find_empty(bo):
-    # Checks through every row
+    # Loops through every row
     for i in range(len(bo)):
-        # Checks through every column
+        # Loops through every column
         for j in range(len(bo[0])):
-            # Checks if the square equals 0
+            # Returns the position of the empty square if found
             if bo[i][j] == 0:
                 return (i, j)  # returns the row, column
-    # No empty square was found
+    # No empty squares were found
     return None
